@@ -45,13 +45,15 @@ namespace DogApp.Web.Dto.TrackDtos
         public string? Category { get; set; }
         public ICollection<TrackItem>? TrackItems { get; set; }
 
-        public TrackDtoTrackBuilder(string? name, int height, int width, string category, List<TrackItem> items)
+        // Ret parameternavnene, så de matcher med objektets egenskaber
+        public TrackDtoTrackBuilder(string? name, int height, int width, string category, ICollection<TrackItem>? trackItems)
         {
             Name = name;
             Height = height;
             Width = width;
             Category = category;
-            TrackItems = new List<TrackItem>();
+            TrackItems = trackItems ?? new Collection<TrackItem>(); // Hvis trackItems er null, opret en ny Collection
         }
     }
+
 }

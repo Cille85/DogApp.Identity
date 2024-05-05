@@ -1,76 +1,96 @@
-
-using DogApp.Shared;
+using DogApp.Data;
 using DogApp.Repository;
+using DogApp.Repository.UserRepo;
 using DogApp.Services;
 using DogApp.Services.Interfaces;
+using DogApp.Shared.EntityUserModels;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using DogApp.Data;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
 
-namespace DogApp.API;
 
-/// <summary>
-/// Indeholder metoder til opsætning og konfiguration af programmet.
-/// </summary>
-public class Program
+namespace DogApp.API
 {
-    /// <summary>
-    /// Indgangspunktet for programmet.
-    /// </summary>
-    /// <param name="args">Kommandolinjeargumenter.</param>
-    public static void Main(string[] args)
+    public class Program
     {
-        var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-        var builder = WebApplication.CreateBuilder(args);
-        // Konfigurerer CORS-policy.
-        builder.Services.AddCors(options =>
+        public static void Main(string[] args)
         {
-            options.AddPolicy(MyAllowSpecificOrigins,
-                policy =>
-                {
-                    policy.WithOrigins("https://localhost:7243").AllowAnyHeader().AllowAnyMethod();
-
-                }
-                );
-        });
-        // Registrerer services i containeren.
-        builder.Services.AddScoped<ITrackRepo, TrackRepo>();
-        builder.Services.AddScoped<ITrackService, TrackService>();
-
-        builder.Services.AddScoped<IItemRepo, ItemRepo>();
-        builder.Services.AddScoped<IItemService, ItemService>();
-
-        // Konfigurerer DbContext.
-        builder.Services.AddDbContext<DataContext>(options =>
-        {
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-        }
-        );
-        builder.Services.AddControllersWithViews();
-
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
-        //builder.Services.AddAutoMapper(typeof(Program));
-
-        var app = builder.Build();
-
-        // Konfigurerer HTTP-request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            var builder = WebApplication.CreateBuilder(args);
+            ConfigureServices(builder.Services, builder.Configuration);
+            var app = builder.Build();
+            Configure(app, builder.Environment);
+            app.Run();
         }
 
 
-        app.UseHttpsRedirection();
+        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+        {
+            // Configure CORS policy.
+            services.AddCors(options =>
+            {
+                options.AddPolicy("_myAllowSpecificOrigins",
+                    policy =>
+                    {
+                        policy.WithOrigins("https://localhost:7243").AllowAnyHeader().AllowAnyMethod();
+                    });
+            });
 
-        app.UseCors(MyAllowSpecificOrigins);
+            // Register repositories.
+            services.AddScoped<ITrackRepo, TrackRepo>();
+            services.AddScoped<IItemRepo, ItemRepo>();
+            services.AddScoped<IUserRepository, UserRepo>();
 
-        app.UseAuthorization();
+            // Register services.
+            services.AddScoped<ITrackService, TrackService>();
+            services.AddScoped<IItemService, ItemService>();
+            services.AddScoped<IUserService, UserService>();
 
+            // Configure DbContext.
+            services.AddDbContext<DataContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            });
 
-        app.MapControllers();
+            services.AddDbContext<DataContextApplicationUser>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("UserConnection"));
+            });
 
-        app.Run();
+            // Identity configuration
+            services.AddIdentity<User, IdentityRole>(options =>
+            {
+                // Configure identity options if needed
+            })
+            .AddEntityFrameworkStores<DataContextApplicationUser>(); // Use the ApplicationUser connection for Identity
+
+            services.AddControllersWithViews();
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
+        }
+
+        private static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseCors("_myAllowSpecificOrigins");
+            app.UseRouting();
+            app.UseAuthentication(); // Add authentication middleware
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+
     }
 }
