@@ -45,7 +45,5 @@ namespace DogApp.Services
         {
             await _signInManager.SignOutAsync();
         }
-
-        // Andre metoder som f.eks. opdatering, sletning osv. kan tilføjes efter behov
     }
 }

@@ -11,8 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Hosting;
-
 
 namespace DogApp.API
 {
@@ -26,7 +24,6 @@ namespace DogApp.API
             Configure(app, builder.Environment);
             app.Run();
         }
-
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
@@ -65,8 +62,14 @@ namespace DogApp.API
             services.AddIdentity<User, IdentityRole>(options =>
             {
                 // Configure identity options if needed
+                options.Password.RequireDigit = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
             })
-            .AddEntityFrameworkStores<DataContextApplicationUser>(); // Use the ApplicationUser connection for Identity
+            .AddEntityFrameworkStores<DataContextApplicationUser>() // Use the ApplicationUser connection for Identity
+            .AddDefaultTokenProviders(); // Add this line to enable default token providers
 
             services.AddControllersWithViews();
             services.AddEndpointsApiExplorer();
@@ -91,6 +94,5 @@ namespace DogApp.API
                 endpoints.MapControllers();
             });
         }
-
     }
 }

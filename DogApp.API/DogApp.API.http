@@ -13,3 +13,13 @@ Content-Type: application/json
 }
 
 ###
+GET {{DogApp.API_HostAddress}}/track/GetAllTracks
+Content-Type:application/json {}
+
+###
+POST {{DogApp.API_HostAddress}}/User/register
+Content-Type:application/json {}
+
+###
+OPTIONS {{DogApp.API_HostAddress}}
+Content-Type: application/json {}
