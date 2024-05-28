@@ -2,6 +2,7 @@
 using DogApp.API.Dto.UserDtos;
 using DogApp.Services.Interfaces;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DogApp.Shared.EntityUserModels;
 
@@ -19,7 +20,8 @@ namespace DogApp.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(UserRegisterDto userDto)
+        [Consumes("application/json")]
+        public async Task<IActionResult> Register([FromBody] UserRegisterDto userDto)
         {
             if (!ModelState.IsValid)
             {
@@ -28,7 +30,8 @@ namespace DogApp.API.Controllers
 
             var user = new User
             {
-                UserName = userDto.UserName
+                UserName = userDto.UserName,
+                Email = userDto.UserName // Assuming username is an email, otherwise, adjust as needed
             };
 
             var result = await _userService.CreateUserAsync(user, userDto.Password);
@@ -38,11 +41,12 @@ namespace DogApp.API.Controllers
                 return Ok("User registered successfully.");
             }
 
-            return BadRequest(result.Errors);
+            var errors = result.Errors.Select(e => new { e.Code, e.Description });
+            return BadRequest(errors);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginDto userDto)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto userDto)
         {
             if (!ModelState.IsValid)
             {

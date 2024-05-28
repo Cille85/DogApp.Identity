@@ -17,7 +17,7 @@ namespace DogApp.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
+           // modelBuilder.ApplyConfiguration(new UserConfiguration());
         }
 
         // DbSet for brugeren
