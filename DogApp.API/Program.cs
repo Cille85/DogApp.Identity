@@ -71,7 +71,7 @@ namespace DogApp.API
             .AddEntityFrameworkStores<DataContextApplicationUser>() // Use the ApplicationUser connection for Identity
             .AddDefaultTokenProviders(); // Add this line to enable default token providers
 
-            services.AddControllersWithViews();.
+            services.AddControllersWithViews();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
         }
