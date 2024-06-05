@@ -27,7 +27,7 @@ namespace DogApp.API
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            // Configure CORS policy.
+            // Configure CORS policy. Her er det adgang fra vores blazzor, 
             services.AddCors(options =>
             {
                 options.AddPolicy("_myAllowSpecificOrigins",
